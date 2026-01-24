@@ -5,7 +5,6 @@ yarn.lock
 
 # Data files
 data/
-*.json
 
 # Environment variables
 .env
