@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maps - Drive Smart Portal</title>
+
+  <!-- Shared site styles (navbar, buttons, etc.) -->
+  <link rel="stylesheet" href="/css/style.css" />
+  <!-- Maps-specific styles (isolated, no global overrides) -->
+  <link rel="stylesheet" href="/css/maps.css" />
+</head>
+<body>
+
+  <!-- ── Navbar (same structure as every other page) ── -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="/dashboard.html" class="nav-brand">🚗 Drive Smart Portal</a>
+      <ul class="nav-links" id="nav-links"></ul>
+      <div class="user-info" id="user-info"></div>
+    </div>
+  </nav>
+
+  <!-- ── Maps Page Wrapper (all IDs are maps-* prefixed to avoid conflicts) ── -->
+  <div id="maps-page-wrapper">
+    <div id="maps-panel">
+
+      <!-- Sidebar: controls -->
+      <aside id="maps-sidebar">
+        <h2>🗺️ Route Planner</h2>
+
+        <!-- Status / error banner -->
+        <div id="maps-status"></div>
+
+        <!-- Source input -->
+        <div class="maps-input-group">
+          <label for="maps-source">📍 Source</label>
+          <input
+            id="maps-source"
+            type="text"
+            placeholder="Enter starting point…"
+            autocomplete="off"
+          />
+        </div>
+
+        <!-- "Use my location" shortcut -->
+        <button id="maps-btn-locate" class="maps-btn maps-btn-outline">
+          📡 Use Current Location as Source
+        </button>
+
+        <!-- Destination input -->
+        <div class="maps-input-group">
+          <label for="maps-dest">🏁 Destination</label>
+          <input
+            id="maps-dest"
+            type="text"
+            placeholder="Enter destination…"
+            autocomplete="off"
+          />
+        </div>
+
+        <!-- Get route -->
+        <button id="maps-btn-route" class="maps-btn maps-btn-primary">
+          🔍 Get Best Route
+        </button>
+
+        <hr class="maps-divider" />
+
+        <!-- Route info (shown after a successful route fetch) -->
+        <div id="maps-route-info">
+          <strong style="color:#065f46; font-size:0.9rem;">Best Route</strong>
+          <div class="info-row">
+            <span class="label">📏 Distance</span>
+            <span id="maps-info-distance">—</span>
+          </div>
+          <div class="info-row">
+            <span class="label">⏱️ ETA</span>
+            <span id="maps-info-duration">—</span>
+          </div>
+          <div class="info-row">
+            <span class="label">🛣️ Via</span>
+            <span id="maps-info-via">—</span>
+          </div>
+          <p style="font-size:0.75rem; color:#6b7280; margin-top:0.25rem;">
+            ETA includes real-time traffic conditions.
+          </p>
+        </div>
+
+        <!-- Alternate routes list (shown when Google returns alternatives) -->
+        <div id="maps-alt-routes"></div>
+
+        <!-- Open in Google Maps for turn-by-turn navigation -->
+        <a id="maps-btn-navigate" class="maps-btn maps-btn-secondary" style="display:none;" target="_blank" rel="noopener noreferrer">
+          🧭 Start Navigation in Google Maps
+        </a>
+
+      </aside>
+
+      <!-- Map canvas -->
+      <div id="maps-map-container">
+        <div id="maps-map"></div>
+
+        <!-- Traffic legend (bottom-right of map) -->
+        <div id="maps-traffic-legend">
+          <span class="legend-title">🚦 Traffic</span>
+          <div class="legend-row"><span class="legend-dot" style="background:#00b050;"></span> Free flow</div>
+          <div class="legend-row"><span class="legend-dot" style="background:#ffbf00;"></span> Slow</div>
+          <div class="legend-row"><span class="legend-dot" style="background:#e51400;"></span> Congested</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Scripts ── -->
+
+  <!-- Shared nav logic -->
+  <script src="/js/nav.js"></script>
+
+  <!-- Maps page logic (isolated IIFE) -->
+  <script src="/js/maps.js"></script>
+
+  <!--
+    ╔══════════════════════════════════════════════════════════════════╗
+    ║  REPLACE  YOUR_GOOGLE_MAPS_API_KEY  with your actual API key.   ║
+    ║  Enable these APIs in Google Cloud Console:                     ║
+    ║    • Maps JavaScript API                                        ║
+    ║    • Directions API                                             ║
+    ║    • Places API  (for autocomplete)                             ║
+    ║    • Geocoding API (for reverse-geocode of current location)    ║
+    ╚══════════════════════════════════════════════════════════════════╝
+  -->
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCKGSNdeaYtLAytXNVrjCb0P6hkkxoh61Q&libraries=places&callback=mapsPageInit"
+    async defer
+  ></script>
+
+</body>
+</html>

@@ -36,6 +36,7 @@ function updateNavigation() {
       { href: '/learning.html', text: 'Learning Hub' },
       { href: '/resources.html', text: 'Resources' },
       { href: '/upload.html', text: 'Upload' },
+      { href: '/maps.html', text: '🗺️ Maps' },
       { href: '/problem.html', text: 'Ask Problem' },
       { href: '/about.html', text: 'About Us' }
     ];
