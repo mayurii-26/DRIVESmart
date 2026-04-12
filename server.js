@@ -723,6 +723,25 @@ app.get('/api/admin/problems', requireAdmin, (req, res) => {
   res.json({ success: true, problems: problems.reverse() });
 });
 
+// Explicit route for ll_questions.json — guaranteed to work on all environments
+app.get('/data/ll_questions.json', (req, res) => {
+  const filePath = path.join(__dirname, 'public', 'data', 'll_questions.json');
+  if (!fs.existsSync(filePath)) {
+    console.error('❌ ll_questions.json not found at:', filePath);
+    return res.status(404).json({ error: 'Questions file not found' });
+  }
+  res.sendFile(filePath);
+});
+
+// Explicit route for indian-traffic-rules.json
+app.get('/data/indian-traffic-rules.json', (req, res) => {
+  const filePath = path.join(__dirname, 'public', 'data', 'indian-traffic-rules.json');
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ error: 'File not found' });
+  }
+  res.sendFile(filePath);
+});
+
 // HTML files are handled by the middleware above and static file serving
 
 // Start server
