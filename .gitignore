@@ -3,8 +3,12 @@ node_modules/
 package-lock.json
 yarn.lock
 
-# Data files
-data/
+# Data files (root-level only — runtime JSON storage)
+/data/
+
+# Keep public/data (static JSON files needed for frontend features)
+!public/data/
+!public/data/**
 
 # Environment variables
 .env
