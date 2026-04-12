@@ -13,12 +13,6 @@ require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-// Serve static frontend files
-app.use(express.static("public"));
-
-app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/public/login.html");
-});
 
 // Middleware
 app.use(bodyParser.json());
@@ -69,10 +63,10 @@ app.use((req, res, next) => {
   next();
 });
 
-// Serve static files from public directory
-app.use(express.static('public', { 
-  index: false, // Don't serve index.html automatically
-  dotfiles: 'deny' // Don't expose dotfiles
+// Serve static files from public directory (absolute path for Render compatibility)
+app.use(express.static(path.join(__dirname, 'public'), {
+  index: false,
+  dotfiles: 'deny'
 }));
 
 // Disable directory listing
