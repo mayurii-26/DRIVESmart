@@ -37,7 +37,6 @@ function updateNavigation() {
       { href: '/resources.html', text: 'Resources' },
       { href: '/upload.html', text: 'Upload' },
       { href: '/maps.html', text: '🗺️ Maps' },
-      { href: '/problem.html', text: 'Ask Problem' },
       { href: '/about.html', text: 'About Us' }
     ];
     

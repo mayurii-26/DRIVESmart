@@ -114,3 +114,37 @@
   }
 }
 
+
+/* Help prompt bubble */
+.help-prompt-bubble {
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-left: 4px solid #f59e0b;
+  color: var(--gray-dark);
+}
+
+/* Small button variant */
+.btn-sm {
+  padding: 0.4rem 1rem;
+  font-size: 0.875rem;
+}
+
+/* AI message bubble markdown content */
+.message.bot .message-bubble h3,
+.message.bot .message-bubble h4 {
+  color: var(--primary-blue);
+  margin: 0.75rem 0 0.25rem;
+}
+
+.message.bot .message-bubble ul {
+  padding-left: 1.25rem;
+  margin: 0.5rem 0;
+}
+
+.message.bot .message-bubble li {
+  margin-bottom: 0.3rem;
+}
+
+.message.bot .message-bubble strong {
+  color: var(--primary-blue);
+}

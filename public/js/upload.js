@@ -200,6 +200,14 @@ async function loadUploads() {
   }
 }
 
+function getViewUrl(upload) {
+  return `/api/file/${upload.id}`;
+}
+
+function getDownloadUrl(upload) {
+  return `/api/file/${upload.id}?download=1`;
+}
+
 function renderUploads(uploads) {
   const listDiv = document.getElementById('uploads-list');
   
@@ -234,8 +242,8 @@ function renderUploads(uploads) {
         <td>${size}</td>
         <td>${date}</td>
         <td>
-          <a href="${upload.cloudinaryUrl}" target="_blank" class="btn btn-secondary" style="padding: 0.5rem 1rem; margin-right: 0.5rem;">View</a>
-          <a href="${upload.cloudinaryUrl}" download="${upload.fileName}" class="btn btn-primary" style="padding: 0.5rem 1rem;">Download</a>
+          <a href="${getViewUrl(upload)}" target="_blank" class="btn btn-secondary" style="padding: 0.5rem 1rem; margin-right: 0.5rem;">View</a>
+          <a href="${getDownloadUrl(upload)}" target="_blank" class="btn btn-primary" style="padding: 0.5rem 1rem;">Download</a>
         </td>
       </tr>
     `;

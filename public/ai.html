@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RTO AI Assistant - Drive Smart Portal</title>
+  <title>AI Assistant - Drive Smart Portal</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/ai.css">
 </head>
@@ -15,55 +15,87 @@
       <div class="user-info" id="user-info"></div>
     </div>
   </nav>
-  
+
   <div class="container">
     <div class="card">
       <div class="card-header">
-        <h1 class="card-title">🤖 RTO AI Assistant</h1>
+        <h1 class="card-title">🤖 Drive Smart AI Assistant</h1>
+        <span class="badge badge-verified">Gemini Powered</span>
       </div>
-      <p style="color: var(--gray); margin-bottom: 2rem;">
-        Ask questions about RTO services: LL/DL, RC registration/transfer, hypothecation removal, NOC, PUC, insurance, penalties, international permits, license categories, and scrappage.
+      <p style="color: var(--gray); margin-bottom: 1.5rem;">
+        Ask anything about RTO services, traffic rules, driving licenses, vehicle registration, road safety, and more.
       </p>
-      
+
       <div class="chat-container">
         <div class="chat-messages" id="chat-messages">
           <div class="message bot">
             <div class="message-bubble">
-              👋 Hello! I'm your RTO AI Assistant. I can help you with verified information about:
-              <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
-                <li>Learner's License (LL) & Driving License (DL)</li>
-                <li>RC Registration & Transfer</li>
-                <li>Hypothecation Removal</li>
-                <li>NOC (No Objection Certificate)</li>
-                <li>PUC Certificate</li>
-                <li>Insurance</li>
-                <li>State Penalties</li>
-                <li>International Permits</li>
-                <li>License Category Addition</li>
-                <li>Vehicle Scrappage</li>
+              👋 Hello! I'm your <strong>Drive Smart AI Assistant</strong>, powered by Gemini.<br><br>
+              I can help you with:
+              <ul style="margin-top:0.5rem; padding-left:1.5rem; line-height:2;">
+                <li>Learner's License (LL) &amp; Driving License (DL)</li>
+                <li>RC Registration, Transfer &amp; Hypothecation Removal</li>
+                <li>NOC, PUC Certificate &amp; Vehicle Insurance</li>
+                <li>Traffic Rules, Challans &amp; Road Safety</li>
+                <li>Driving Test Preparation</li>
+                <li>Parivahan Sewa portal guidance</li>
               </ul>
-              <p style="margin-top: 1rem;">What would you like to know?</p>
+              <p style="margin-top:1rem;">What would you like to know?</p>
             </div>
           </div>
         </div>
-        
+
         <div class="chat-input-area">
-          <input type="text" id="query-input" class="chat-input" placeholder="Ask about any RTO service..." onkeypress="if(event.key === 'Enter') sendQuery()">
-          <button class="btn btn-primary" onclick="sendQuery()">Send</button>
+          <input
+            type="text"
+            id="query-input"
+            class="chat-input"
+            placeholder="Ask about any RTO service, traffic rule, or driving query..."
+            autocomplete="off"
+          >
+          <button id="send-btn" class="btn btn-primary" onclick="sendMessage()">Send</button>
         </div>
       </div>
     </div>
-    
-    <div class="card" id="response-card" style="display: none;">
+
+    <!-- Still Need Help Panel -->
+    <div class="card" id="issue-panel" style="display:none;">
       <div class="card-header">
-        <h2 class="card-title">Response</h2>
+        <h2 class="card-title">📋 Submit Issue to Admin</h2>
       </div>
-      <div id="response-content"></div>
+      <p style="color: var(--gray); margin-bottom: 1.5rem;">
+        If the AI couldn't resolve your query, submit it here and our admin team will review it within 2–3 business days.
+      </p>
+      <form id="issue-form">
+        <div class="form-group">
+          <label class="form-label" for="issue-category">Category</label>
+          <select id="issue-category" class="form-select" required>
+            <option value="">Select category...</option>
+            <option value="license">License Related</option>
+            <option value="registration">Vehicle Registration</option>
+            <option value="document">Document Issues</option>
+            <option value="payment">Payment / Challan</option>
+            <option value="technical">Technical Issue</option>
+            <option value="general">General Inquiry</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="issue-description">Describe Your Issue</label>
+          <textarea
+            id="issue-description"
+            class="form-textarea"
+            required
+            placeholder="Provide details about your problem or question..."
+          ></textarea>
+        </div>
+        <div id="issue-status"></div>
+        <button type="submit" class="btn btn-primary">Submit Issue</button>
+        <button type="button" class="btn btn-outline" style="margin-left:1rem;" onclick="toggleIssueForm()">Cancel</button>
+      </form>
     </div>
   </div>
-  
+
   <script src="/js/nav.js"></script>
   <script src="/js/ai.js"></script>
 </body>
 </html>
-

@@ -7,6 +7,7 @@ const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const csv = require('csv-parser');
 const bcrypt = require('bcryptjs');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // Load environment variables from .env file
 require('dotenv').config();
@@ -40,18 +41,6 @@ app.use((req, res, next) => {
       if (!req.session.user || req.session.user.role !== 'admin') {
         return res.status(403).send('Access denied. Admin privileges required.');
       }
-      return next();
-    }
-    
-    // ai.html is the RTO AI Assistant page
-    if (req.path === '/ai.html') {
-      // Already checked for auth above
-      return next();
-    }
-    
-    // problem.html is the Ask Your Problem page
-    if (req.path === '/problem.html') {
-      // Already checked for auth above
       return next();
     }
     
@@ -275,215 +264,107 @@ app.get('/api/user', (req, res) => {
   }
 });
 
-// RTO AI Assistant
-app.post('/api/assistant', requireAuth, (req, res) => {
-  const { query } = req.body;
-  
-  // Log activity
-  const activities = JSON.parse(fs.readFileSync(activitiesFile, 'utf8'));
-  activities.push({
-    userId: req.session.user.id,
-    userName: req.session.user.name,
-    action: 'assistant_query',
-    timestamp: new Date().toISOString(),
-    details: { query }
-  });
-  fs.writeFileSync(activitiesFile, JSON.stringify(activities, null, 2));
-  
-  // RTO service knowledge base
-  const rtoServices = {
-    'll': {
-      summary: 'Learner\'s License (LL) is the first step to obtaining a driving license in India. It allows you to learn driving under supervision.',
-      documents: ['Age proof (Birth Certificate, Aadhaar, Passport)', 'Address proof (Aadhaar, Utility bill, Bank statement)', '4 passport size photographs', 'Medical certificate (Form 1A) for certain categories'],
-      fees: 'Rs. 200 (varies by state)',
-      steps: ['Fill Form 1', 'Submit documents at RTO', 'Appear for LL test (written)', 'Pass the test to receive LL'],
-      timeline: '7-15 days after passing the test',
-      online: 'Available on Parivahan Sewa portal',
-      offline: 'Visit nearest RTO office',
-      tips: ['Study traffic signs and rules thoroughly', 'Practice mock tests online', 'Carry all original documents'],
-      sources: ['Parivahan Sewa (parivahan.gov.in)', 'State RTO website', 'Motor Vehicles Act 1988']
-    },
-    'dl': {
-      summary: 'Driving License (DL) is the official document that authorizes you to drive motor vehicles on public roads.',
-      documents: ['Learner\'s License (valid for at least 30 days)', 'Age and address proof', '4 passport photographs', 'Driving test appointment receipt'],
-      fees: 'Rs. 500-2000 (varies by vehicle type and state)',
-      steps: ['Complete 30 days with LL', 'Book driving test slot', 'Appear for driving test', 'Pass test to receive DL'],
-      timeline: '15-30 days after passing driving test',
-      online: 'Available on Parivahan Sewa portal',
-      offline: 'Visit RTO office for test',
-      tips: ['Practice driving with a licensed driver', 'Familiarize yourself with test route', 'Ensure vehicle is in good condition'],
-      sources: ['Parivahan Sewa', 'State RTO', 'Motor Vehicles Act 1988']
-    },
-    'rc': {
-      summary: 'Registration Certificate (RC) is the official document proving vehicle ownership and registration with RTO.',
-      documents: ['Invoice from dealer', 'Insurance certificate', 'PUC certificate', 'Address proof', 'PAN card/Aadhaar'],
-      fees: 'Rs. 300-1500 (varies by vehicle type)',
-      steps: ['Purchase vehicle from dealer', 'Dealer submits documents to RTO', 'RTO processes registration', 'Receive RC card'],
-      timeline: '7-15 days from date of application',
-      online: 'Track status on Parivahan portal',
-      offline: 'Dealer handles registration process',
-      tips: ['Verify all details on invoice', 'Ensure insurance is active', 'Keep all documents safe'],
-      sources: ['Parivahan Sewa', 'Vehicle dealer', 'RTO office']
-    },
-    'rc transfer': {
-      summary: 'RC Transfer is required when vehicle ownership changes, such as buying a used vehicle.',
-      documents: ['Original RC', 'NOC from previous owner', 'Insurance certificate', 'PUC certificate', 'Address proof of new owner', 'Sale agreement'],
-      fees: 'Rs. 500-2000 (varies by state)',
-      steps: ['Obtain NOC from previous owner', 'Submit Form 29 and 30 at RTO', 'Pay transfer fees', 'Complete verification', 'Receive updated RC'],
-      timeline: '15-30 days',
-      online: 'Form submission available online',
-      offline: 'Visit RTO for verification',
-      tips: ['Verify vehicle history', 'Check for pending challans', 'Ensure NOC is valid'],
-      sources: ['Parivahan Sewa', 'RTO office']
-    },
-    'hypothecation removal': {
-      summary: 'Hypothecation removal is required when vehicle loan is fully paid and you want to remove the financier\'s name from RC.',
-      documents: ['Original RC', 'Loan closure letter from bank', 'NOC from financier', 'Insurance certificate', 'PUC certificate'],
-      fees: 'Rs. 200-500',
-      steps: ['Obtain loan closure certificate', 'Get NOC from financier', 'Submit Form 35 at RTO', 'Pay fees and complete process'],
-      timeline: '7-15 days',
-      online: 'Application available online',
-      offline: 'Visit RTO for submission',
-      tips: ['Ensure all loan dues are cleared', 'Get proper NOC from bank', 'Keep closure certificate safe'],
-      sources: ['Parivahan Sewa', 'Financing bank', 'RTO office']
-    },
-    'noc': {
-      summary: 'No Objection Certificate (NOC) is required when transferring vehicle registration to another state.',
-      documents: ['Original RC', 'Insurance certificate', 'PUC certificate', 'Address proof of new state', 'Challan clearance certificate'],
-      fees: 'Rs. 100-500',
-      steps: ['Clear all pending challans', 'Submit NOC application at current RTO', 'Pay fees', 'Receive NOC'],
-      timeline: '7-10 days',
-      online: 'Application available online',
-      offline: 'Visit RTO office',
-      tips: ['Clear all traffic violations first', 'Ensure insurance is valid', 'Get address proof for new state'],
-      sources: ['Parivahan Sewa', 'RTO office']
-    },
-    'puc': {
-      summary: 'Pollution Under Control (PUC) certificate is mandatory for all vehicles to ensure they meet emission standards.',
-      documents: ['RC or vehicle registration number', 'Previous PUC (if renewing)'],
-      fees: 'Rs. 50-200',
-      steps: ['Visit authorized PUC center', 'Vehicle emission test', 'Pay fees', 'Receive PUC certificate'],
-      timeline: 'Same day (immediate)',
-      online: 'Available at authorized centers',
-      offline: 'Visit PUC center',
-      tips: ['Get PUC before expiry', 'Keep vehicle well-maintained', 'Carry RC or vehicle number'],
-      sources: ['Authorized PUC centers', 'Parivahan Sewa']
-    },
-    'insurance': {
-      summary: 'Motor vehicle insurance is mandatory under the Motor Vehicles Act to cover third-party liability.',
-      documents: ['RC or vehicle details', 'Previous insurance (if renewing)', 'Identity proof'],
-      fees: 'Varies by vehicle type and coverage (Rs. 2000-10000+)',
-      steps: ['Compare insurance plans', 'Choose policy', 'Submit documents', 'Pay premium', 'Receive policy'],
-      timeline: 'Same day to 3 days',
-      online: 'Available on insurance company websites',
-      offline: 'Visit insurance office or agent',
-      tips: ['Compare multiple insurers', 'Check coverage details', 'Renew before expiry', 'Keep policy document safe'],
-      sources: ['Insurance company websites', 'IRDA approved insurers']
-    },
-    'state penalties': {
-      summary: 'Traffic violation penalties vary by state and violation type as per the Motor Vehicles (Amendment) Act 2019.',
-      documents: ['Challan receipt', 'Vehicle RC', 'DL'],
-      fees: 'Rs. 500-10000+ depending on violation',
-      steps: ['Receive challan', 'Pay penalty online or offline', 'Keep receipt', 'Clear violation from record'],
-      timeline: 'Immediate (online) or same day (offline)',
-      online: 'Available on state traffic police portals',
-      offline: 'Visit traffic police station or court',
-      tips: ['Pay promptly to avoid additional charges', 'Keep payment receipts', 'Check for discounts on early payment'],
-      sources: ['State traffic police websites', 'Parivahan Sewa', 'eChallan portals']
-    },
-    'international permit': {
-      summary: 'International Driving Permit (IDP) allows you to drive in foreign countries that recognize Indian licenses.',
-      documents: ['Valid Indian DL', 'Passport size photographs', 'Passport copy', 'Visa copy (if available)'],
-      fees: 'Rs. 1000',
-      steps: ['Apply at RTO or through agent', 'Submit documents', 'Pay fees', 'Receive IDP'],
-      timeline: '7-10 days',
-      online: 'Application available online',
-      offline: 'Visit RTO office',
-      tips: ['Apply well in advance of travel', 'Ensure DL is valid', 'Check country requirements'],
-      sources: ['RTO office', 'Parivahan Sewa']
-    },
-    'license category': {
-      summary: 'Adding a new vehicle category to existing driving license requires passing a driving test for that category.',
-      documents: ['Original DL', 'Medical certificate (for commercial)', 'Age proof', 'Passport photographs'],
-      fees: 'Rs. 500-2000',
-      steps: ['Apply for new category', 'Book test slot', 'Appear for driving test', 'Pass test to get updated DL'],
-      timeline: '15-30 days after passing test',
-      online: 'Available on Parivahan Sewa',
-      offline: 'Visit RTO for test',
-      tips: ['Practice for specific vehicle type', 'Ensure you meet age requirements', 'Carry all documents'],
-      sources: ['Parivahan Sewa', 'RTO office']
-    },
-    'scrappage': {
-      summary: 'Vehicle scrappage policy allows you to officially scrap old vehicles and get benefits for purchasing new ones.',
-      documents: ['Original RC', 'Vehicle', 'Identity proof', 'NOC from financier (if applicable)'],
-      fees: 'Varies (may get benefits instead)',
-      steps: ['Register vehicle for scrappage', 'Get vehicle evaluated', 'Scrap at authorized center', 'Receive scrappage certificate', 'Get benefits for new vehicle'],
-      timeline: '15-30 days',
-      online: 'Registration available online',
-      offline: 'Visit authorized scrappage center',
-      tips: ['Check vehicle age eligibility', 'Compare scrappage benefits', 'Ensure all documents are ready'],
-      sources: ['Government scrappage portal', 'Authorized scrappage centers']
-    }
-  };
-  
-  // Simple keyword matching
-  const queryLower = query.toLowerCase();
-  let matchedService = null;
-  
-  for (const [key, service] of Object.entries(rtoServices)) {
-    if (queryLower.includes(key) || key.includes(queryLower)) {
-      matchedService = service;
+// Gemini model priority list — tries each in order if quota exceeded
+const GEMINI_MODELS = [
+  'gemini-2.5-flash-lite',
+  'gemini-2.0-flash',
+  'gemini-2.0-flash-lite'
+];
+
+const SYSTEM_INSTRUCTION = `You are the Drive Smart Assistant, an AI exclusively for the Drive Smart Portal — an Indian RTO services platform.
+
+You ONLY answer questions related to:
+- Traffic rules and road safety in India
+- RTO services (Learner's License, Driving License, RC, NOC, PUC, hypothecation removal, vehicle scrappage, international driving permit)
+- Vehicle registration, transfer, and documentation
+- Driving test preparation and guidance
+- Vehicle insurance (motor)
+- Traffic challans and penalties
+- Navigation and route assistance
+- Transport regulations and Motor Vehicles Act
+- Parivahan Sewa portal guidance
+
+If a user asks about ANYTHING outside this domain (movies, coding, politics, sports, personal advice, general knowledge, science, history, etc.), politely refuse:
+"I am the Drive Smart Assistant and can only help with transportation, RTO, driving, and traffic-related queries."
+
+Be concise and professional. Use bullet points or numbered steps for procedures. Mention parivahan.gov.in when applicable.`;
+
+// Gemini AI Chat Route
+app.post('/api/chat', requireAuth, async (req, res) => {
+  const { message, history } = req.body;
+  if (!message || message.trim().length === 0) {
+    return res.status(400).json({ error: 'Message is required' });
+  }
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || apiKey === 'your-gemini-api-key-here') {
+    return res.status(503).json({ error: 'AI service not configured. Please add GEMINI_API_KEY to .env file.' });
+  }
+
+  // Limit history to last 6 exchanges to reduce token usage
+  const trimmedHistory = (history || []).slice(-12).map(h => ({
+    role: h.role,
+    parts: [{ text: h.text }]
+  }));
+
+  console.log(`📨 [/api/chat] User: ${req.session.user.email} | Message: "${message.substring(0, 80)}"`);
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+  let lastError = null;
+
+  // Try each model in priority order
+  for (const modelName of GEMINI_MODELS) {
+    console.log(`🤖 Trying model: ${modelName}`);
+    try {
+      const model = genAI.getGenerativeModel({
+        model: modelName,
+        systemInstruction: SYSTEM_INSTRUCTION
+      });
+
+      const chat = model.startChat({ history: trimmedHistory });
+      const result = await chat.sendMessage(message.trim());
+      const reply = result.response.text();
+
+      // Log activity
+      const activities = JSON.parse(fs.readFileSync(activitiesFile, 'utf8'));
+      activities.push({
+        userId: req.session.user.id,
+        userName: req.session.user.name,
+        action: 'ai_chat',
+        timestamp: new Date().toISOString(),
+        details: { message: message.substring(0, 100), model: modelName }
+      });
+      fs.writeFileSync(activitiesFile, JSON.stringify(activities, null, 2));
+
+      return res.json({ success: true, reply });
+    } catch (error) {
+      lastError = error;
+      console.error(`❌ [${modelName}] Error status: ${error.status} | Message: ${error.message}`);
+      const status = error.status || (error.message && error.message.includes('429') ? 429 : 0);
+      if (status === 429) {
+        console.warn(`⚠️ [${modelName}] Quota exceeded, trying next model...`);
+        continue;
+      }
+      console.error(`❌ [${modelName}] Non-quota error, stopping fallback. Full error:`, JSON.stringify(error, Object.getOwnPropertyNames(error)));
       break;
     }
   }
-  
-  // Check for common keywords
-  if (!matchedService) {
-    if (queryLower.includes('learner') || queryLower.includes('ll')) {
-      matchedService = rtoServices.ll;
-    } else if (queryLower.includes('driving license') || queryLower.includes('dl')) {
-      matchedService = rtoServices.dl;
-    } else if (queryLower.includes('registration') || queryLower.includes('rc')) {
-      matchedService = rtoServices.rc;
-    } else if (queryLower.includes('transfer')) {
-      matchedService = rtoServices['rc transfer'];
-    } else if (queryLower.includes('hypothecation')) {
-      matchedService = rtoServices['hypothecation removal'];
-    } else if (queryLower.includes('noc') || queryLower.includes('no objection')) {
-      matchedService = rtoServices.noc;
-    } else if (queryLower.includes('puc') || queryLower.includes('pollution')) {
-      matchedService = rtoServices.puc;
-    } else if (queryLower.includes('insurance')) {
-      matchedService = rtoServices.insurance;
-    } else if (queryLower.includes('penalty') || queryLower.includes('challan') || queryLower.includes('fine')) {
-      matchedService = rtoServices['state penalties'];
-    } else if (queryLower.includes('international') || queryLower.includes('idp')) {
-      matchedService = rtoServices['international permit'];
-    } else if (queryLower.includes('category') || queryLower.includes('add')) {
-      matchedService = rtoServices['license category'];
-    } else if (queryLower.includes('scrap')) {
-      matchedService = rtoServices.scrappage;
-    }
+
+  // All models failed — return appropriate error
+  console.error('Gemini API error:', lastError && lastError.message);
+  const errMsg = lastError && lastError.message || '';
+  if (errMsg.includes('429')) {
+    return res.status(429).json({ error: 'AI service is busy right now. Please wait a moment and try again.' });
   }
-  
-  if (matchedService) {
-    res.json({ success: true, data: matchedService });
-  } else {
-    res.json({ 
-      success: true, 
-      data: {
-        summary: 'I can help you with various RTO services. Please ask about: Learner\'s License (LL), Driving License (DL), RC Registration/Transfer, Hypothecation Removal, NOC, PUC, Insurance, State Penalties, International Permits, License Category Addition, or Vehicle Scrappage.',
-        documents: [],
-        fees: '',
-        steps: [],
-        timeline: '',
-        online: '',
-        offline: '',
-        tips: ['Be specific about which RTO service you need help with', 'Have your documents ready before applying'],
-        sources: ['Parivahan Sewa (parivahan.gov.in)']
-      }
-    });
+  if (errMsg.includes('403') || errMsg.includes('API_KEY')) {
+    return res.status(403).json({ error: 'AI service configuration error. Please contact admin.' });
   }
+  res.status(500).json({ error: 'AI service temporarily unavailable. Please try again.' });
+});
+
+// Legacy assistant route — redirects to Gemini chat
+app.post('/api/assistant', requireAuth, (req, res) => {
+  res.json({ success: false, error: 'This endpoint is deprecated. Please use /api/chat.' });
 });
 
 // Document Upload with multer error handling
@@ -557,11 +438,12 @@ app.post('/api/upload', requireAuth, (req, res, next) => {
     
     // Upload to Cloudinary using upload_stream
     const uploadResult = await new Promise((resolve, reject) => {
+      const isPdf = req.file.mimetype === 'application/pdf';
       const uploadStream = cloudinary.uploader.upload_stream(
         { 
-          resource_type: 'auto', 
+          resource_type: isPdf ? 'raw' : 'image', 
           folder: 'drive-smart',
-          allowed_formats: ['jpg', 'jpeg', 'png', 'pdf']
+          allowed_formats: isPdf ? ['pdf'] : ['jpg', 'jpeg', 'png']
         },
         (error, result) => {
           if (error) {
@@ -721,6 +603,29 @@ app.get('/api/admin/users', requireAdmin, (req, res) => {
 app.get('/api/admin/problems', requireAdmin, (req, res) => {
   const problems = JSON.parse(fs.readFileSync(problemsFile, 'utf8'));
   res.json({ success: true, problems: problems.reverse() });
+});
+
+// Proxy route for viewing/downloading uploaded documents
+app.get('/api/file/:uploadId', requireAuth, async (req, res) => {
+  const uploads = JSON.parse(fs.readFileSync(uploadsFile, 'utf8'));
+  const upload = uploads.find(u => u.id === req.params.uploadId &&
+    (u.userId === req.session.user.id || req.session.user.role === 'admin'));
+  if (!upload) return res.status(404).json({ error: 'File not found' });
+
+  try {
+    const https = require('https');
+    const url = new URL(upload.cloudinaryUrl);
+    https.get(upload.cloudinaryUrl, (fileRes) => {
+      res.setHeader('Content-Type', upload.fileType);
+      const disposition = req.query.download === '1'
+        ? `attachment; filename="${upload.fileName}"`
+        : `inline; filename="${upload.fileName}"`;
+      res.setHeader('Content-Disposition', disposition);
+      fileRes.pipe(res);
+    }).on('error', () => res.status(500).json({ error: 'Failed to fetch file' }));
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch file' });
+  }
 });
 
 // Explicit route for ll_questions.json — guaranteed to work on all environments
