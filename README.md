@@ -1,162 +1,331 @@
-# Drive Smart Portal
+# 🚗 Drive Smart Portal
 
-A comprehensive unified web application for RTO services, learning resources, and document management.
+Drive Smart Portal is an AI-powered smart transportation and RTO assistance web platform designed to simplify transportation-related services, improve driving awareness, and provide intelligent user support through a unified digital system.
 
-## Features
+The platform integrates AI assistance, smart navigation, learning resources, driving test preparation, document management, and government service access into a single user-friendly web application.
 
-- 🔐 **Secure Authentication**: Login/Sign-Up system with session management
-- 🤖 **RTO AI Assistant**: Verified, structured responses for all RTO services
-- 💬 **Dataset Chatbot**: Upload CSV/JSON files and query with intelligent search
-- 📚 **Learning Hub**: 14+ curated learning resources with progress tracking
-- 🔗 **Resource Links**: 20+ government portals with detailed guides
-- 📤 **Document Upload**: Secure cloud storage with Cloudinary integration
-- ❓ **Ask Your Problem**: Submit issues for admin review
-- 👨‍💼 **Admin Panel**: Analytics, user management, and activity tracking
+---
 
-## Quick Start
+# ✨ Key Features
 
-### Prerequisites
+## 🤖 AI-Powered Drive Smart Assistant
+- Gemini API integrated conversational AI assistant
+- Provides guidance for:
+  - Driving License (DL)
+  - Learner's License (LL)
+  - Vehicle Registration (RC)
+  - PUC & Insurance
+  - Traffic Rules & Challans
+  - Road Safety & Navigation
+  - Parivahan Portal support
+- Domain-restricted responses (only transportation & RTO related queries)
+- Intelligent fallback:
+  - “Still need help?”
+  - “Submit Issue to Admin”
 
-- Node.js (v14 or higher)
-- npm or yarn
+---
 
-### Installation
+## 🗺️ Smart Maps & Navigation
+- Google Maps integration
+- Real-time location tracking
+- Traffic-aware route suggestions
+- Estimated distance and travel time
+- Efficient route navigation support
 
-1. Install dependencies:
+---
+
+## 📚 Learning Hub
+- Curated transportation and driving learning resources
+- Driving awareness materials
+- Government transport information
+- Road safety educational content
+
+---
+
+## 📝 Driving Test Practice
+- Mock driving license test preparation
+- Multiple-choice practice questions
+- Traffic sign and rule awareness
+- User performance tracking
+
+---
+
+## 📤 Smart Document Management
+- Upload and manage:
+  - Driving License
+  - Registration Certificate (RC)
+  - PUC documents
+  - Vehicle-related documents
+- Cloudinary cloud storage integration
+- Secure file upload handling
+
+---
+
+## 🔐 Authentication & User Management
+- Secure login and registration system
+- Session-based authentication
+- Admin access control
+- User activity management
+
+---
+
+## 👨‍💼 Admin Panel
+- User management
+- Uploaded issue monitoring
+- System activity tracking
+- Analytics and administration tools
+
+---
+
+# 🛠️ Technologies Used
+
+## Frontend
+- HTML5
+- CSS3
+- JavaScript (Vanilla JS)
+
+## Backend
+- Node.js
+- Express.js
+
+## APIs & Cloud Services
+- Gemini API (Google AI)
+- Google Maps API
+- Cloudinary
+
+## Authentication & Security
+- Express Sessions
+- bcryptjs
+
+## File Handling
+- Multer
+- Cloudinary Storage
+
+## Data Storage
+- JSON-based structured storage
+
+---
+
+# 🧠 AI Assistant Architecture
+
+```text
+User Query
+    ↓
+Frontend Chat Interface
+    ↓
+Node.js Backend API
+    ↓
+Gemini AI API
+    ↓
+AI-generated Transportation/RTO Response
+    ↓
+Response Display to User
+```
+
+---
+
+# 📁 Project Structure
+
+```text
+DriveSmart/
+│
+├── server.js
+├── package.json
+├── package-lock.json
+├── README.md
+├── .env
+├── .env.example
+├── .gitignore
+│
+├── data/
+│   ├── activities.json
+│   ├── ll_questions.json
+│   ├── problems.json
+│   ├── uploads.json
+│   └── users.json
+│
+├── public/
+│   │
+│   ├── css/
+│   │   ├── ai.css
+│   │   ├── maps.css
+│   │   └── style.css
+│   │
+│   ├── js/
+│   │   ├── ai.js
+│   │   ├── auth.js
+│   │   ├── maps.js
+│   │   ├── nav.js
+│   │   └── upload.js
+│   │
+│   ├── data/
+│   ├── datasets/
+│   ├── public/
+│   │
+│   ├── about.html
+│   ├── admin.html
+│   ├── ai.html
+│   ├── dashboard.html
+│   ├── learning.html
+│   ├── login.html
+│   ├── maps.html
+│   ├── practice.html
+│   ├── problem.html
+│   ├── resources.html
+│   └── upload.html
+```
+
+---
+
+# ⚙️ Installation & Setup
+
+## Prerequisites
+- Node.js (v14 or above)
+- npm
+
+---
+
+## 1️⃣ Clone Repository
+
+```bash
+git clone https://github.com/mayurii-26/DRIVESmart.git
+cd DRIVESmart
+```
+
+---
+
+## 2️⃣ Install Dependencies
+
 ```bash
 npm install
 ```
 
-2. (Optional) Set up Cloudinary for document uploads:
-   - Create a `.env` file in the root directory
-   - Add your Cloudinary credentials:
-   ```
-   CLOUDINARY_CLOUD_NAME=your-cloud-name
-   CLOUDINARY_API_KEY=your-api-key
-   CLOUDINARY_API_SECRET=your-api-secret
-   ```
-   - If not set, document uploads will use placeholder credentials (configure for production)
+---
 
-3. Start the server:
+## 3️⃣ Configure Environment Variables
+
+Create a `.env` file in the root directory:
+
+```env
+PORT=3000
+
+# Gemini API
+GEMINI_API_KEY=your_gemini_api_key
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+```
+
+---
+
+## 4️⃣ Start the Application
+
 ```bash
 npm start
 ```
 
-4. Open your browser and navigate to:
-```
-https://drivesmart-4xnr.onrender.com/
+---
+
+## 5️⃣ Run the Project
+
+Open browser:
+
+```text
 http://localhost:3000
 ```
 
-### Default Admin Credentials
+or deployed version:
 
-- **Email**: `admin@drivesmart.gov.in`
-- **Password**: `admin123`
-
-⚠️ **Important**: Change the admin password in production!
-
-## Project Structure
-
-```
-drive-smart-portal/
-├── server.js              # Express server (backend + API routes)
-├── package.json           # Dependencies and scripts
-├── data/                  # JSON data storage (auto-created)
-│   ├── users.json
-│   ├── activities.json
-│   ├── uploads.json
-│   └── problems.json
-└── public/                # Frontend files
-    ├── css/
-    │   └── style.css      # Unified stylesheet
-    ├── js/
-    │   ├── auth.js        # Authentication logic
-    │   └── nav.js         # Navigation logic
-    └── *.html             # All HTML pages
+```text
+https://drivesmart-4xnr.onrender.com/
 ```
 
-## Pages
+---
 
-- `/` or `/login.html` - Login/Sign-Up (default)
-- `/dashboard.html` - Main dashboard
-- `/rto-assistant.html` - RTO AI Assistant
-- `/chatbot.html` - Dataset-based chatbot
-- `/learning.html` - Learning Hub
-- `/resources.html` - Government resource links
-- `/upload.html` - Document upload system
-- `/ask-problem.html` - Submit problems
-- `/about.html` - About us page
-- `/admin.html` - Admin panel (admin only)
+# 🔑 Default Admin Credentials
 
-## API Endpoints
+```text
+Email: admin@drivesmart.gov.in
+Password: admin123
+```
 
-### Authentication
-- `POST /api/register` - User registration
-- `POST /api/login` - User login
-- `POST /api/logout` - User logout
-- `GET /api/user` - Get current user
+⚠️ Change credentials before production deployment.
 
-### RTO Assistant
-- `POST /api/rto-assistant` - Query RTO services
+---
 
-### Chatbot
-- `POST /api/chatbot/upload` - Upload CSV/JSON dataset
-- `POST /api/chatbot/query` - Query dataset
-- `GET /api/chatbot/dataset` - Check dataset status
+# 🌐 Main Modules
 
-### Documents
-- `POST /api/upload` - Upload document
-- `GET /api/uploads` - Get user's documents
+| Module | Description |
+|---|---|
+| AI Assistant | Intelligent transportation and RTO guidance |
+| Maps & Navigation | Smart route and traffic assistance |
+| Learning Hub | Educational transportation resources |
+| Driving Test | Mock DL/LL preparation |
+| Upload System | Secure document management |
+| Admin Panel | Monitoring and management |
 
-### Problems
-- `POST /api/problem` - Submit problem
+---
 
-### Admin
-- `GET /api/admin/stats` - Get statistics
-- `GET /api/admin/activities` - Get activities
-- `GET /api/admin/users` - Get all users
-- `GET /api/admin/problems` - Get all problems
+# 🔒 Security Features
 
-## Technologies Used
-
-- **Backend**: Node.js, Express.js
-- **Frontend**: HTML, CSS, JavaScript (vanilla)
-- **Authentication**: Express Sessions, bcryptjs
-- **File Upload**: Multer, Cloudinary
-- **Data Storage**: JSON files (can be migrated to database)
-
-## Security Features
-
-- Password hashing with bcrypt
+- Password hashing using bcrypt
 - Session-based authentication
-- Protected routes with middleware
+- Protected API routes
+- File upload validation
 - Admin role-based access control
-- Secure file upload validation
+- Environment variable protection
 
-## Development
+---
 
-The application runs as a single unified server. All frontend files are served from the `/public` directory, and all API routes are handled by the Express server in `server.js`.
+# 📌 API Endpoints
 
-### Adding New Features
+## Authentication
+- `POST /api/register`
+- `POST /api/login`
+- `POST /api/logout`
 
-1. **New Page**: Create HTML file in `/public` directory
-2. **New API Route**: Add route handler in `server.js`
-3. **Styling**: Use existing CSS variables in `/public/css/style.css`
+## AI Assistant
+- `POST /api/chat`
 
-## Production Deployment
+## Uploads
+- `POST /api/upload`
+- `GET /api/uploads`
 
-1. Set environment variables for Cloudinary
-2. Change session secret in `server.js`
-3. Change default admin password
-4. Consider migrating from JSON files to a database
-5. Enable HTTPS
-6. Set up proper error logging
+## Problems
+- `POST /api/problem`
 
-## License
+## Admin
+- `GET /api/admin/stats`
+- `GET /api/admin/users`
+- `GET /api/admin/problems`
 
-ISC
+---
 
-## Support
+# 🚀 Deployment
 
-For issues or questions, submit a problem through the "Ask Your Problem" page in the application.
+The project is deployed using:
 
+- Render (Backend + Hosting)
+- GitHub (Version Control)
+
+---
+
+# 📖 Research Focus
+
+The Drive Smart Portal focuses on:
+- AI-powered transportation assistance
+- Intelligent navigation systems
+- Smart RTO digitalization
+- Road safety awareness
+- Conversational AI integration
+- User-centric smart transportation support
+
+---
+
+# 📄 License
+
+This project is developed for academic and research purposes.
+
+---
